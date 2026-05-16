@@ -4,24 +4,33 @@ import JobList from './components/JobList'
 
 const STORAGE_KEY = 'jobApplications'
 
+const loadApplicationsFromStorage = () => {
+  try {
+    const savedApplications = localStorage.getItem(STORAGE_KEY)
+
+    if (!savedApplications) {
+      return []
+    }
+
+    const parsedApplications = JSON.parse(savedApplications)
+
+    return Array.isArray(parsedApplications) ? parsedApplications : []
+  } catch (error) {
+    console.error('Failed to load saved applications:', error)
+    return []
+  }
+}
+
 function App() {
-  const [applications, setApplications] = useState([])
+  const [applications, setApplications] = useState(() => loadApplicationsFromStorage())
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    const savedApplications = localStorage.getItem(STORAGE_KEY)
-
-    if (savedApplications) {
-      try {
-        setApplications(JSON.parse(savedApplications))
-      } catch (error) {
-        console.error('Failed to parse saved applications:', error)
-      }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(applications))
+    } catch (error) {
+      console.error('Failed to save applications:', error)
     }
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(applications))
   }, [applications])
 
   const addApplication = (application) => {
